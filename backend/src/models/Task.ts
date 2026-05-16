@@ -28,7 +28,7 @@ export type TaskDocument = HydratedDocument<ITask>;
  * Task Schema
  * MongoDB schema for Task collection
  */
-const TaskSchema: Schema = new Schema(
+const TaskSchema = new Schema<ITask>(
   {
     title: {
       type: String,
