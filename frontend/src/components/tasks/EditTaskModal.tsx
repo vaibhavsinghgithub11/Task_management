@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import type { Task, CreateTaskData, Project, User } from '../../types';
 import { projectApi } from '../../api/projects';
-import { userApi } from '../../api/users';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
 
@@ -24,7 +23,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ isOpen, onClose, onSubmit
     project: '',
   });
   const [projects, setProjects] = useState<Project[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [projectMembers, setProjectMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -39,7 +37,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ isOpen, onClose, onSubmit
         status: task.status,
         priority: task.priority,
         dueDate: task.dueDate.split('T')[0], // Format date for input
-        assignedTo: task.assignedTo.id || task.assignedTo._id,
+        assignedTo: task.assignedTo.id,
         project: task.project._id,
       });
       fetchData();
@@ -60,12 +58,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ isOpen, onClose, onSubmit
   const fetchData = async () => {
     try {
       setLoadingData(true);
-      const [projectsRes, usersRes] = await Promise.all([
-        projectApi.getAll(),
-        userApi.getAll(),
-      ]);
+      const projectsRes = await projectApi.getAll();
       setProjects(projectsRes.data);
-      setUsers(usersRes.data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load data');
     } finally {

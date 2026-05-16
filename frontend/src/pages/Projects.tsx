@@ -7,10 +7,8 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
 import { projectApi } from '../api/projects';
 import type { Project, CreateProjectData } from '../types';
-import { useAuth } from '../context/AuthContext';
 
 const Projects: React.FC = () => {
-  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
