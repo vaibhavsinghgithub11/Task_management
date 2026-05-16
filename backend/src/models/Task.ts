@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, HydratedDocument } from 'mongoose';
 import { TaskStatus, TaskPriority } from '../types';
 
 /**
@@ -17,6 +17,12 @@ export interface ITask extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Task Document Type
+ * Hydrated document type for proper TypeScript support in middleware
+ */
+export type TaskDocument = HydratedDocument<ITask>;
 
 /**
  * Task Schema
@@ -83,9 +89,9 @@ TaskSchema.index({ dueDate: 1 });
 /**
  * Pre-save middleware to check for overdue tasks
  */
-TaskSchema.pre('save', function (next) {
+TaskSchema.pre<TaskDocument>('save', function (next) {
   // If task is not completed and due date has passed, mark as overdue
-  if (this.status !== TaskStatus.COMPLETED && new Date() > this.dueDate) {
+  if (this.status !== TaskStatus.COMPLETED && new Date().getTime() > new Date(this.dueDate).getTime()) {
     this.status = TaskStatus.OVERDUE;
   }
   next();
