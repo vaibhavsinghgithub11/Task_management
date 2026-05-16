@@ -21,7 +21,7 @@ export interface IUser extends Document {
  * User Schema
  * MongoDB schema for User collection
  */
-const UserSchema: Schema = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     name: {
       type: String,
@@ -94,7 +94,7 @@ UserSchema.methods.generateToken = function (): string {
   return jwt.sign(
     { id: this._id, role: this.role },
     process.env.JWT_SECRET as string,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    { expiresIn: (process.env.JWT_EXPIRE || '7d') as any }
   );
 };
 
