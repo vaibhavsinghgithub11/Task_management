@@ -1,0 +1,341 @@
+### Team Task Manager API Tests
+### Use REST Client extension in VS Code to run these tests
+
+@baseUrl = http://localhost:5000
+@adminToken = your_admin_token_here
+@memberToken = your_member_token_here
+@userId = user_id_here
+@projectId = project_id_here
+@memberId = member_id_here
+@taskId = task_id_here
+
+### Health Check
+GET {{baseUrl}}/health
+
+### ============================================
+### AUTHENTICATION ENDPOINTS
+### ============================================
+
+### 1. Register Admin User
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@example.com",
+  "password": "admin123",
+  "role": "admin"
+}
+
+### 2. Register Member User
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "member"
+}
+
+### 3. Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+### 4. Get Current User (Protected)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### USER MANAGEMENT (ADMIN ONLY)
+### ============================================
+
+### 5. Get All Users (Admin Only)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{adminToken}}
+
+### 6. Get User Statistics (Admin Only)
+GET {{baseUrl}}/api/users/stats
+Authorization: Bearer {{adminToken}}
+
+### 7. Get Single User (Admin Only)
+GET {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{adminToken}}
+
+### 8. Update User Role (Admin Only)
+PUT {{baseUrl}}/api/users/{{userId}}/role
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "role": "admin"
+}
+
+### 9. Delete User (Admin Only)
+DELETE {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### PROJECT MANAGEMENT
+### ============================================
+
+### 10. Create Project (Admin Only)
+POST {{baseUrl}}/api/projects
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "E-Commerce Website",
+  "description": "Build a full-stack e-commerce platform with React and Node.js",
+  "members": ["{{memberId}}"]
+}
+
+### 11. Get All Projects (Admin sees all, Member sees assigned)
+GET {{baseUrl}}/api/projects
+Authorization: Bearer {{adminToken}}
+
+### 12. Get Single Project
+GET {{baseUrl}}/api/projects/{{projectId}}
+Authorization: Bearer {{adminToken}}
+
+### 13. Update Project (Admin Only)
+PUT {{baseUrl}}/api/projects/{{projectId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "E-Commerce Platform (Updated)",
+  "description": "Build a full-stack e-commerce platform with advanced features"
+}
+
+### 14. Delete Project (Admin Only)
+DELETE {{baseUrl}}/api/projects/{{projectId}}
+Authorization: Bearer {{adminToken}}
+
+### 15. Add Member to Project (Admin Only)
+POST {{baseUrl}}/api/projects/{{projectId}}/members
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "userId": "{{memberId}}"
+}
+
+### 16. Remove Member from Project (Admin Only)
+DELETE {{baseUrl}}/api/projects/{{projectId}}/members/{{memberId}}
+Authorization: Bearer {{adminToken}}
+
+### 17. Get My Created Projects (Admin Only)
+GET {{baseUrl}}/api/projects/my/created
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### TASK MANAGEMENT
+### ============================================
+
+### 18. Create Task (Admin Only)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Design Homepage UI",
+  "description": "Create wireframes and mockups for the homepage",
+  "status": "Todo",
+  "priority": "High",
+  "dueDate": "2026-05-20T00:00:00.000Z",
+  "assignedTo": "{{memberId}}",
+  "project": "{{projectId}}"
+}
+
+### 19. Get All Tasks (Admin sees all, Member sees assigned)
+GET {{baseUrl}}/api/tasks
+Authorization: Bearer {{adminToken}}
+
+### 20. Get Single Task
+GET {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+
+### 21. Update Task (Admin Only)
+PUT {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Design Homepage UI (Updated)",
+  "priority": "Medium",
+  "dueDate": "2026-05-22T00:00:00.000Z"
+}
+
+### 22. Update Task Status (Members can update their own)
+PATCH {{baseUrl}}/api/tasks/{{taskId}}/status
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "status": "In Progress"
+}
+
+### 23. Delete Task (Admin Only)
+DELETE {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+
+### 24. Get Tasks by Project
+GET {{baseUrl}}/api/tasks/project/{{projectId}}
+Authorization: Bearer {{adminToken}}
+
+### 25. Get My Assigned Tasks
+GET {{baseUrl}}/api/tasks/my/assigned
+Authorization: Bearer {{memberToken}}
+
+### 26. Filter Tasks by Status
+GET {{baseUrl}}/api/tasks?status=Todo
+Authorization: Bearer {{adminToken}}
+
+### 27. Filter Tasks by Priority
+GET {{baseUrl}}/api/tasks?priority=High
+Authorization: Bearer {{adminToken}}
+
+### 28. Search Tasks by Title
+GET {{baseUrl}}/api/tasks?search=Design
+Authorization: Bearer {{adminToken}}
+
+### 29. Combined Filters
+GET {{baseUrl}}/api/tasks?status=Todo&priority=High&project={{projectId}}
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### DASHBOARD & ANALYTICS
+### ============================================
+
+### 30. Get Dashboard Statistics
+GET {{baseUrl}}/api/dashboard/stats
+Authorization: Bearer {{adminToken}}
+
+### 31. Get Tasks by Priority
+GET {{baseUrl}}/api/dashboard/tasks/by-priority
+Authorization: Bearer {{adminToken}}
+
+### 32. Get Tasks by Status
+GET {{baseUrl}}/api/dashboard/tasks/by-status
+Authorization: Bearer {{adminToken}}
+
+### 33. Get Recent Tasks
+GET {{baseUrl}}/api/dashboard/tasks/recent?limit=5
+Authorization: Bearer {{adminToken}}
+
+### 34. Get Upcoming Tasks
+GET {{baseUrl}}/api/dashboard/tasks/upcoming?limit=5
+Authorization: Bearer {{adminToken}}
+
+### 35. Get Tasks by Project (Admin Only)
+GET {{baseUrl}}/api/dashboard/tasks/by-project
+Authorization: Bearer {{adminToken}}
+
+### 36. Get Team Performance (Admin Only)
+GET {{baseUrl}}/api/dashboard/team/performance
+Authorization: Bearer {{adminToken}}
+
+### 37. Get Activity Summary
+GET {{baseUrl}}/api/dashboard/activity
+Authorization: Bearer {{adminToken}}
+
+### 38. Get Dashboard Stats (Member View)
+GET {{baseUrl}}/api/dashboard/stats
+Authorization: Bearer {{memberToken}}
+
+### ============================================
+### RBAC TESTS - Member Access (Should Fail)
+### ============================================
+
+### 39. Member tries to get all users (should fail with 403)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{memberToken}}
+
+### 40. Member tries to create project (should fail with 403)
+POST {{baseUrl}}/api/projects
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "title": "Unauthorized Project",
+  "description": "This should fail"
+}
+
+### 41. Member tries to update project (should fail with 403)
+PUT {{baseUrl}}/api/projects/{{projectId}}
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "title": "Hacked Title"
+}
+
+### 42. Member tries to delete project (should fail with 403)
+DELETE {{baseUrl}}/api/projects/{{projectId}}
+Authorization: Bearer {{memberToken}}
+
+### 43. Member tries to create task (should fail with 403)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer {{memberToken}}
+Content-Type: application/json
+
+{
+  "title": "Unauthorized Task",
+  "description": "This should fail",
+  "dueDate": "2026-05-20T00:00:00.000Z",
+  "assignedTo": "{{memberId}}",
+  "project": "{{projectId}}"
+}
+
+### 44. Member tries to delete task (should fail with 403)
+DELETE {{baseUrl}}/api/tasks/{{taskId}}
+Authorization: Bearer {{memberToken}}
+
+### 45. Member tries to get team performance (should fail with 403)
+GET {{baseUrl}}/api/dashboard/team/performance
+Authorization: Bearer {{memberToken}}
+
+### 46. Member tries to get tasks by project (should fail with 403)
+GET {{baseUrl}}/api/dashboard/tasks/by-project
+Authorization: Bearer {{memberToken}}
+
+### ============================================
+### ERROR CASES
+### ============================================
+
+### Register with existing email (should fail)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Another User",
+  "email": "admin@example.com",
+  "password": "password123"
+}
+
+### Login with wrong password (should fail)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "wrongpassword"
+}
+
+### Access protected route without token (should fail)
+GET {{baseUrl}}/api/auth/me
+
+### Create project without title (should fail)
+POST {{baseUrl}}/api/projects
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "description": "Missing title"
+}
