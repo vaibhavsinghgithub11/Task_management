@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, HydratedDocument } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserRole } from '../types';
@@ -16,6 +16,12 @@ export interface IUser extends Document {
   matchPassword(enteredPassword: string): Promise<boolean>;
   generateToken(): string;
 }
+
+/**
+ * User Document Type
+ * Hydrated document type for proper TypeScript support in middleware
+ */
+export type UserDocument = HydratedDocument<IUser>;
 
 /**
  * User Schema
@@ -60,7 +66,7 @@ const UserSchema: Schema = new Schema(
 );
 
 // Virtual field to add 'id' as an alias for '_id'
-UserSchema.virtual('id').get(function() {
+UserSchema.virtual('id').get(function(this: UserDocument) {
   return this._id.toHexString();
 });
 
@@ -68,21 +74,22 @@ UserSchema.virtual('id').get(function() {
  * Hash password before saving
  * Middleware that runs before save operation
  */
-UserSchema.pre('save', async function (next) {
+UserSchema.pre<UserDocument>('save', async function (next) {
   // Only hash password if it's modified
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 /**
  * Compare entered password with hashed password
  * Instance method available on user documents
  */
-UserSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
+UserSchema.methods.matchPassword = async function (this: UserDocument, enteredPassword: string): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
@@ -90,11 +97,16 @@ UserSchema.methods.matchPassword = async function (enteredPassword: string): Pro
  * Generate JWT token
  * Instance method to create authentication token
  */
-UserSchema.methods.generateToken = function (): string {
+UserSchema.methods.generateToken = function (this: UserDocument): string {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  
   return jwt.sign(
-    { id: this._id, role: this.role },
-    process.env.JWT_SECRET as string,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    { id: this._id.toString(), role: this.role },
+    jwtSecret,
+    { expiresIn: process.env.JWT_EXPIRE || '7d' } as jwt.SignOptions
   );
 };
 
